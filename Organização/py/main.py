@@ -223,6 +223,12 @@ def criar_tabela_a1(
         "RESULTADO ENCONTRADO - A1.TXT"
     )
     table.add_column(
+        "Escolha",
+        style="bold yellow",
+        justify="center",
+        width=8,
+    )
+    table.add_column(
         "Status",
         style="bold green",
         justify="center",
@@ -248,12 +254,14 @@ def criar_tabela_a1(
     ):
         if escolhido == indice:
             table.add_row(
+                str(indice),
                 "[green]✓[/green]",
                 f"[green]{numero}[/green]",
                 f"[green]{texto}[/green]"
             )
         else:
             table.add_row(
+                str(indice),
                 "",
                 str(numero),
                 texto
