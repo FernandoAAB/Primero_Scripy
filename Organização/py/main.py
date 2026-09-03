@@ -319,6 +319,7 @@ def exibir_tabela_a2():
     input(
         "\nPressione ENTER para voltar..."
     )
+
 # =========================================================
 # ADICIONAR ITEM
 # =========================================================
@@ -477,6 +478,7 @@ def adicionar_itens_por_termo(termo):
             "\nPressione ENTER para continuar..."
         )
         return 1, [item]
+
 # =========================================================
 # EXTRAIR VALOR DO DÉBITO
 # =========================================================
@@ -486,7 +488,6 @@ def extrair_valor_debito(texto):
     Exemplos:
         102,00 D  -> 102,00
         1.250,50 D -> 1.250,50
-
     Registros com C não são considerados.
     """
     import re
@@ -526,7 +527,6 @@ def comparar_debitos_a1_a2():
             debitos_a2.add(
                 valor
             )
-
     # -----------------------------------------------------
     # CRIA TABELA
     # -----------------------------------------------------
@@ -540,7 +540,6 @@ def comparar_debitos_a1_a2():
         padding=(0, 1),
         pad_edge=False,
     )
-
     table.add_column(
         "Linha A1",
         style="bold yellow",
@@ -631,9 +630,7 @@ def menu():
         menu_itens = [
             ("[A]", "Abrir lista completa do destino"),
             ("[B]", "Buscar no arquivo principal"),
-            ("[AD]", "Adicionar número/termo"),
             ("[BL]", "Buscar na lista de destino"),
-            ("[L]", "Listar numerada e ordenada"),
             ("[D]", "Comparar débitos A1 x A2"),
             ("[P]", "Exportar para No/N.txt"),
             ("[S]", "Sair"),
@@ -768,11 +765,6 @@ def menu():
                         "\nPressione ENTER para voltar..."
                     )
         # =================================================
-        # LISTAR A2
-        # =================================================
-        elif opcao_up == "L":
-            exibir_tabela_a2()
-        # =================================================
         # EXPORTAR
         # =================================================
         elif opcao_up == "P":
@@ -802,30 +794,6 @@ def menu():
             input(
                 "\nPressione ENTER para voltar..."
             )
-        # =================================================
-        # ADICIONAR
-        # =================================================
-        elif opcao_up == "AD":
-            termo = input(
-                "Digite o número ou nome para adicionar: "
-            ).strip()
-            if termo:
-                resultado = (
-                    adicionar_itens_por_termo(
-                        termo
-                    )
-                )
-                if resultado != 0:
-                    pass
-                else:
-                    limpar_tela()
-                    console.print(
-                        "[yellow]Não encontrado no a1.txt "
-                        "ou já adicionado.[/yellow]"
-                    )
-                    input(
-                        "\nPressione ENTER para voltar..."
-                    )
         # =================================================
         # DIGITA DIRETAMENTE
         # =================================================
