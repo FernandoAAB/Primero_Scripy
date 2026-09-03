@@ -5,7 +5,7 @@ from rich.table import Table
 from rich.prompt import Prompt
 from rich.panel import Panel
 
-console = Console(width=110, force_terminal=True, legacy_windows=True)
+console = Console(width=140, force_terminal=True, legacy_windows=True)
 
 from datetime import datetime
 import os
@@ -478,6 +478,150 @@ def adicionar_itens_por_termo(termo):
         )
         return 1, [item]
 # =========================================================
+# EXTRAIR VALOR DO DÉBITO
+# =========================================================
+def extrair_valor_debito(texto):
+    """
+    Procura um valor seguido de D.
+    Exemplos:
+        102,00 D  -> 102,00
+        1.250,50 D -> 1.250,50
+
+    Registros com C não são considerados.
+    """
+    import re
+    texto = texto.strip().upper()
+    # Procura valores como:
+    # 102,00 D
+    # 1.250,50 D
+    # 102.00 D
+    padrao = r'(\d[\d\.,]*)\s*D\b'
+    encontrados = re.findall(
+        padrao,
+        texto
+    )
+    if encontrados:
+        return encontrados[0]
+    return None
+# =========================================================
+# COMPARAR DÉBITOS DO A1 COM A2
+# =========================================================
+def comparar_debitos_a1_a2():
+    origem = carregar_origem_numerada()
+    destino = carregar_linhas(
+        ARQUIVO_DESTINO
+    )
+    # -----------------------------------------------------
+    # PEGA SOMENTE OS VALORES DE DÉBITO DO A2
+    # -----------------------------------------------------
+    debitos_a2 = set()
+    for item in destino:
+        texto = extrair_texto_registro(
+            item
+        )
+        valor = extrair_valor_debito(
+            texto
+        )
+        if valor is not None:
+            debitos_a2.add(
+                valor
+            )
+
+    # -----------------------------------------------------
+    # CRIA TABELA
+    # -----------------------------------------------------
+    table = Table(
+        title="DÉBITOS DO A1 x A2",
+        title_style="bold cyan",
+        header_style="bold white",
+        box=ROUNDED,
+        show_lines=False,
+        expand=True,
+        padding=(0, 1),
+        pad_edge=False,
+    )
+
+    table.add_column(
+        "Linha A1",
+        style="bold yellow",
+        justify="center",
+        width=10,
+        min_width=10,
+        max_width=10,
+        no_wrap=True,
+    )
+    table.add_column(
+        "Registro",
+        style="bold white",
+        justify="left",
+        no_wrap=True,
+        overflow="ignore",
+    )
+    table.add_column(
+        "Situação",
+        justify="center",
+        width=18,
+        min_width=18,
+        max_width=18,
+        no_wrap=True,
+    )
+    total_debitos = 0
+    total_faltando = 0
+    # -----------------------------------------------------
+    # PERCORRE O A1
+    # -----------------------------------------------------
+    for numero, texto in origem:
+        valor = extrair_valor_debito(
+            texto
+        )
+        # -------------------------------------------------
+        # IGNORA REGISTROS SEM D
+        # -------------------------------------------------
+        if valor is None:
+            continue
+        total_debitos += 1
+        # -------------------------------------------------
+        # EXISTE NO A2?
+        # -------------------------------------------------
+        if valor in debitos_a2:
+            table.add_row(
+                str(numero),
+                texto,
+                "[green]OK[/green]"
+            )
+        else:
+            total_faltando += 1
+            table.add_row(
+                f"[bold red]{numero}[/bold red]",
+                f"[bold red]{texto}[/bold red]",
+                "[bold red]FALTA NO A2[/bold red]"
+            )
+    # -----------------------------------------------------
+    # EXIBIR RESULTADO
+    # -----------------------------------------------------
+    limpar_tela()
+    console.print(
+        table,
+        crop=False,
+        overflow="ignore"
+    )
+    console.print()
+    console.print(
+        f"[bold cyan]Débitos no A1:[/bold cyan] "
+        f"{total_debitos}"
+    )
+    console.print(
+        f"[bold red]Débitos faltando no A2:[/bold red] "
+        f"{total_faltando}"
+    )
+    console.print()
+    console.print(
+        "[bold red]VERMELHO = débito existente no A1 e ausente no A2[/bold red]"
+    )
+    input(
+        "\nPressione ENTER para voltar..."
+    )
+# =========================================================
 # MENU
 # =========================================================
 def menu():
@@ -490,6 +634,7 @@ def menu():
             ("[AD]", "Adicionar número/termo"),
             ("[BL]", "Buscar na lista de destino"),
             ("[L]", "Listar numerada e ordenada"),
+            ("[D]", "Comparar débitos A1 x A2"),
             ("[P]", "Exportar para No/N.txt"),
             ("[S]", "Sair"),
         ]
@@ -523,6 +668,8 @@ def menu():
         # =================================================
         elif opcao_up == "A":
             exibir_tabela_a2()
+        elif opcao_up == "D":
+            comparar_debitos_a1_a2()
         # =================================================
         # BUSCAR
         # =================================================
